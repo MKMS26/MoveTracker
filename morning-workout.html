@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Morning Move">
+<title>Morning Move</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#FDF6F0;--surface:#FFFFFF;--surface2:#FAF0E8;
+  --text:#1A1108;--text2:#7A6255;--text3:#B8A99A;
+  --pink:#E8637A;--pink-light:#FCE8EC;--pink-mid:#F4A0B0;
+  --amber:#D4813A;--amber-light:#FDF0E4;
+  --green:#5A9E7A;--green-light:#E8F5EE;
+  --blue:#4A7FB5;--blue-light:#E8F0FA;
+  --purple:#8B6BAE;--purple-light:#F0EAF8;
+  --border:rgba(26,17,8,0.08);
+  --radius:20px;--radius-sm:14px;
+  --safe-top:env(safe-area-inset-top,44px);
+  --safe-bot:env(safe-area-inset-bottom,34px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+.fade-in{animation:fadeIn 0.3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* ── NAV ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding:10px 0 calc(var(--safe-bot));z-index:100;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:10px;color:var(--text3);transition:color 0.2s;}
+.nav-btn.active{color:var(--pink);}
+.nav-icon{font-size:20px;}
+.with-nav{padding-bottom:calc(62px + var(--safe-bot));}
+
+/* ── HOME ── */
+#home{background:linear-gradient(160deg,#FDF6F0 0%,#FAE8E0 60%,#F5D8CC 100%);padding:calc(var(--safe-top) + 16px) 24px 0;}
+.home-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;}
+.app-title{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);line-height:1.1;}
+.app-title span{color:var(--pink);font-style:italic;}
+.streak-pill{background:var(--surface);border-radius:50px;padding:7px 14px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.streak-dot{width:7px;height:7px;border-radius:50%;background:var(--pink);}
+.greeting{font-size:14px;color:var(--text2);margin-bottom:6px;font-weight:300;}
+.today-label{font-family:'DM Serif Display',serif;font-size:32px;line-height:1.1;margin-bottom:24px;}
+
+.week-card{background:var(--surface);border-radius:var(--radius);padding:18px;margin-bottom:16px;box-shadow:0 4px 24px rgba(0,0,0,0.05);}
+.week-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.week-card-title{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;}
+.set-days-btn{font-size:12px;color:var(--pink);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;}
+.week-dots{display:flex;gap:6px;}
+.week-day{flex:1;text-align:center;}
+.wday-name{font-size:10px;color:var(--text3);margin-bottom:5px;}
+.wday-circle{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3);transition:all 0.3s;cursor:pointer;}
+.wday-circle.done-morning{background:var(--pink);border-color:var(--pink);color:white;}
+.wday-circle.done-external{background:var(--purple);border-color:var(--purple);color:white;}
+.wday-circle.done-both{background:linear-gradient(135deg,var(--pink) 50%,var(--purple) 50%);border-color:var(--pink);color:white;}
+.wday-circle.is-workout{background:var(--pink-light);border-color:var(--pink-mid);color:var(--pink);}
+.wday-circle.is-today{border-color:var(--pink);color:var(--pink);font-weight:500;}
+
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;}
+.stat-card{background:var(--surface);border-radius:var(--radius-sm);padding:14px 12px;box-shadow:0 2px 12px rgba(0,0,0,0.04);}
+.stat-num{font-family:'DM Serif Display',serif;font-size:24px;color:var(--text);}
+.stat-lbl{font-size:10px;color:var(--text2);margin-top:1px;line-height:1.3;}
+
+.section-title{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.mode-card{background:var(--surface);border-radius:var(--radius-sm);padding:14px;border:1.5px solid transparent;cursor:pointer;transition:all 0.2s;box-shadow:0 2px 12px rgba(0,0,0,0.04);}
+.mode-card.selected{border-color:var(--pink);background:var(--pink-light);}
+.mode-icon{font-size:20px;margin-bottom:6px;}
+.mode-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:1px;}
+.mode-desc{font-size:11px;color:var(--text2);line-height:1.4;}
+
+.home-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;}
+.start-btn{background:var(--pink);color:white;border:none;border-radius:50px;padding:17px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;width:100%;cursor:pointer;transition:all 0.2s;box-shadow:0 8px 24px rgba(232,99,122,0.35);}
+.start-btn:active{transform:scale(0.97);}
+.log-btn{background:var(--surface);color:var(--purple);border:1.5px solid var(--purple);border-radius:50px;padding:17px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;width:100%;cursor:pointer;transition:all 0.2s;}
+.log-btn:active{transform:scale(0.97);}
+
+/* ── SET DAYS MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;display:flex;align-items:flex-end;justify-content:center;}
+.modal-overlay.hidden{display:none;}
+.modal-sheet{background:var(--surface);border-radius:24px 24px 0 0;padding:24px 24px calc(var(--safe-bot) + 24px);width:100%;max-height:85vh;overflow-y:auto;}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px;}
+.modal-title{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.5;}
+.days-picker{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:24px;}
+.day-pick-btn{aspect-ratio:1;border-radius:50%;border:1.5px solid var(--border);background:transparent;font-size:12px;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.2s;}
+.day-pick-btn.picked{background:var(--pink);border-color:var(--pink);color:white;}
+.modal-confirm{background:var(--pink);color:white;border:none;border-radius:50px;padding:16px;width:100%;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;box-shadow:0 6px 20px rgba(232,99,122,0.3);}
+
+/* ── LOG EXTERNAL MODAL ── */
+.log-modal-sheet{background:var(--surface);border-radius:24px 24px 0 0;padding:24px 24px calc(var(--safe-bot) + 24px);width:100%;}
+.activity-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+.activity-btn{background:var(--surface2);border:1.5px solid transparent;border-radius:var(--radius-sm);padding:14px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;text-align:left;}
+.activity-btn.picked{border-color:var(--purple);background:var(--purple-light);}
+.activity-icon{font-size:22px;margin-bottom:6px;}
+.activity-name{font-size:13px;font-weight:500;color:var(--text);}
+.other-input{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--surface);margin-bottom:16px;outline:none;}
+.other-input:focus{border-color:var(--purple);}
+.duration-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.dur-btn{padding:8px 16px;border-radius:50px;border:1.5px solid var(--border);background:transparent;font-size:13px;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.dur-btn.picked{background:var(--purple);border-color:var(--purple);color:white;}
+.log-confirm{background:var(--purple);color:white;border:none;border-radius:50px;padding:16px;width:100%;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;box-shadow:0 6px 20px rgba(139,107,174,0.3);}
+
+/* ── WORKOUT ── */
+#workout{background:var(--bg);}
+.workout-header{padding:calc(var(--safe-top) + 12px) 24px 16px;background:var(--surface);border-bottom:1px solid var(--border);}
+.back-btn{background:none;border:none;cursor:pointer;font-size:14px;color:var(--text2);padding:0;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px;margin-bottom:12px;}
+.workout-title{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:3px;}
+.workout-meta-txt{font-size:13px;color:var(--text2);}
+.day-tabs-scroll{display:flex;gap:8px;padding:14px 24px;overflow-x:auto;scrollbar-width:none;background:var(--surface);border-bottom:1px solid var(--border);}
+.day-tabs-scroll::-webkit-scrollbar{display:none;}
+.day-pill{flex-shrink:0;padding:7px 16px;border-radius:50px;border:1.5px solid var(--border);background:var(--surface);font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;}
+.day-pill.active{background:var(--pink);border-color:var(--pink);color:white;}
+.exercises-scroll{flex:1;overflow-y:auto;padding:8px 20px 16px;}
+.notice-card{background:var(--pink-light);border-radius:var(--radius-sm);border-left:3px solid var(--pink);padding:12px 14px;font-size:13px;color:var(--text);line-height:1.6;margin:12px 0 4px;}
+.notice-card strong{color:var(--pink);}
+.phase-header{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;padding:14px 0 8px;}
+
+/* Exercise card with illustration */
+.ex-card{background:var(--surface);border-radius:var(--radius-sm);margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow:hidden;transition:opacity 0.2s;}
+.ex-card.done-ex{opacity:0.45;}
+.ex-card-top{display:flex;align-items:center;gap:0;padding:0;}
+.ex-illustration{width:88px;height:88px;flex-shrink:0;background:var(--pink-light);display:flex;align-items:center;justify-content:center;}
+.ex-illustration svg{width:72px;height:72px;}
+.ex-info-block{flex:1;padding:14px 14px 14px 12px;}
+.ex-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:3px;}
+.ex-detail{font-size:12px;color:var(--text2);margin-bottom:8px;}
+.ex-check-row{display:flex;align-items:center;gap:8px;}
+.ex-check{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;background:transparent;flex-shrink:0;}
+.ex-check.checked{background:var(--pink);border-color:var(--pink);}
+.ex-check.checked::after{content:'✓';color:white;font-size:12px;}
+.ex-check-label{font-size:12px;color:var(--text3);}
+
+.tip-card{background:var(--amber-light);border-radius:var(--radius-sm);padding:12px 14px;margin:4px 0 8px;font-size:13px;color:var(--amber);line-height:1.6;display:flex;gap:8px;align-items:flex-start;}
+
+.complete-area{padding:14px 20px calc(var(--safe-bot) + 14px);background:var(--surface);border-top:1px solid var(--border);}
+.progress-wrap{height:4px;background:var(--border);border-radius:2px;margin-bottom:12px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--pink);border-radius:2px;transition:width 0.4s ease;}
+.complete-btn{background:var(--pink);color:white;border:none;border-radius:50px;padding:15px;width:100%;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all 0.2s;box-shadow:0 6px 20px rgba(232,99,122,0.3);}
+.complete-btn:disabled{background:var(--text3);box-shadow:none;cursor:default;}
+.complete-btn:not(:disabled):active{transform:scale(0.97);}
+
+/* ── DONE ── */
+#done{background:linear-gradient(160deg,#FAE8EC 0%,#FDF6F0 60%);padding:calc(var(--safe-top) + 40px) 24px calc(var(--safe-bot) + 40px);align-items:center;justify-content:center;text-align:center;}
+.done-emoji{font-size:60px;margin-bottom:20px;animation:pop 0.5s cubic-bezier(0.175,0.885,0.32,1.275);}
+.done-title{font-family:'DM Serif Display',serif;font-size:30px;margin-bottom:8px;}
+.done-sub{font-size:15px;color:var(--text2);font-weight:300;margin-bottom:36px;line-height:1.5;}
+.done-streak-card{background:var(--surface);border-radius:var(--radius);padding:22px;margin-bottom:28px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,0.06);}
+.done-streak-num{font-family:'DM Serif Display',serif;font-size:44px;color:var(--pink);}
+.done-streak-lbl{font-size:13px;color:var(--text2);margin-top:3px;}
+.home-btn{background:var(--pink);color:white;border:none;border-radius:50px;padding:17px 48px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;box-shadow:0 8px 24px rgba(232,99,122,0.35);}
+.home-btn:active{transform:scale(0.97);}
+
+/* ── HISTORY ── */
+#history{background:var(--bg);}
+.history-header{padding:calc(var(--safe-top) + 12px) 24px 16px;background:var(--surface);border-bottom:1px solid var(--border);}
+.history-title{font-family:'DM Serif Display',serif;font-size:24px;margin-bottom:4px;}
+.history-sub{font-size:13px;color:var(--text2);}
+.legend-row{display:flex;gap:16px;padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);}
+.legend-dot{width:12px;height:12px;border-radius:50%;}
+.month-section{padding:16px 20px;}
+.month-label{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:14px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:8px;}
+.cal-header{text-align:center;font-size:10px;color:var(--text3);font-weight:500;padding-bottom:4px;}
+.cal-cell{aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text2);position:relative;}
+.cal-cell.morning{background:var(--pink);color:white;font-weight:500;}
+.cal-cell.external{background:var(--purple);color:white;font-weight:500;}
+.cal-cell.both{background:linear-gradient(135deg,var(--pink) 50%,var(--purple) 50%);color:white;font-weight:500;}
+.cal-cell.today-c{border:1.5px solid var(--pink);color:var(--pink);font-weight:500;}
+.activity-log-list{padding:0 20px 16px;}
+.activity-entry{background:var(--surface);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px;display:flex;gap:12px;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+.entry-icon-wrap{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.entry-icon-wrap.morning-ic{background:var(--pink-light);}
+.entry-icon-wrap.external-ic{background:var(--purple-light);}
+.entry-info{flex:1;}
+.entry-title{font-size:14px;font-weight:500;color:var(--text);}
+.entry-meta{font-size:12px;color:var(--text2);margin-top:2px;}
+.entry-date{font-size:12px;color:var(--text3);}
+.delete-btn{background:none;border:none;font-size:16px;cursor:pointer;color:var(--text3);padding:4px;}
+
+/* ── INSTALL GUIDE ── */
+#install{background:var(--bg);overflow-y:auto;}
+.install-header{padding:calc(var(--safe-top) + 12px) 24px 16px;background:var(--surface);border-bottom:1px solid var(--border);}
+.install-title{font-family:'DM Serif Display',serif;font-size:24px;}
+.install-body{padding:20px;}
+.install-step{background:var(--surface);border-radius:var(--radius-sm);padding:16px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+.step-num{width:30px;height:30px;border-radius:50%;background:var(--pink);color:white;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.step-text{font-size:14px;color:var(--text);line-height:1.6;}
+.step-text strong{font-weight:500;color:var(--pink);}
+.install-note{background:var(--amber-light);border-radius:var(--radius-sm);padding:14px;font-size:13px;color:var(--amber);line-height:1.6;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HOME ═══════════════ -->
+<div class="screen active with-nav" id="home">
+  <div class="home-top">
+    <div class="app-title">Morning<br><span>Move</span></div>
+    <div class="streak-pill"><div class="streak-dot"></div><span id="streak-label">0 day streak</span></div>
+  </div>
+  <div class="greeting" id="greeting">Good morning</div>
+  <div class="today-label" id="today-label">Today</div>
+
+  <div class="week-card">
+    <div class="week-card-header">
+      <div class="week-card-title">This week</div>
+      <button class="set-days-btn" onclick="openSetDays()">Set workout days</button>
+    </div>
+    <div class="week-dots" id="week-dots"></div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num" id="total-workouts">0</div><div class="stat-lbl">Total workouts</div></div>
+    <div class="stat-card"><div class="stat-num" id="this-month">0</div><div class="stat-lbl">This month</div></div>
+    <div class="stat-card"><div class="stat-num" id="total-classes">0</div><div class="stat-lbl">Classes logged</div></div>
+  </div>
+
+  <div class="section-title">Today's mode</div>
+  <div class="mode-grid">
+    <div class="mode-card selected" data-mode="normal" onclick="selectMode(this)"><div class="mode-icon">☀️</div><div class="mode-name">Regular day</div><div class="mode-desc">Full 5-min workout</div></div>
+    <div class="mode-card" data-mode="lowenergy" onclick="selectMode(this)"><div class="mode-icon">🌙</div><div class="mode-name">Low energy</div><div class="mode-desc">Poor sleep? Gentle reset</div></div>
+    <div class="mode-card" data-mode="pre" onclick="selectMode(this)"><div class="mode-icon">🌸</div><div class="mode-name">Pre-period</div><div class="mode-desc">Ease cramps before they start</div></div>
+    <div class="mode-card" data-mode="during" onclick="selectMode(this)"><div class="mode-icon">🫶</div><div class="mode-name">During period</div><div class="mode-desc">Pain-aware, restorative</div></div>
+  </div>
+
+  <div class="home-actions">
+    <button class="start-btn" onclick="startWorkout()">Start workout →</button>
+    <button class="log-btn" onclick="openLogExternal()">+ Log a class</button>
+  </div>
+</div>
+
+<!-- ═══════════════ SET DAYS MODAL ═══════════════ -->
+<div class="modal-overlay hidden" id="setDaysModal" onclick="closeSetDays(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Workout days</div>
+    <div class="modal-sub">Pick the days you plan to do your morning workout this week. You can change these any time.</div>
+    <div class="days-picker" id="days-picker"></div>
+    <button class="modal-confirm" onclick="saveWorkoutDays()">Save days</button>
+  </div>
+</div>
+
+<!-- ═══════════════ LOG EXTERNAL MODAL ═══════════════ -->
+<div class="modal-overlay hidden" id="logModal" onclick="closeLogModal(event)">
+  <div class="log-modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Log a class</div>
+    <div class="modal-sub">Pilates, run, walk — track everything in one place.</div>
+    <div class="section-title" style="margin-bottom:10px;">Activity type</div>
+    <div class="activity-grid" id="activity-grid">
+      <div class="activity-btn" data-act="Pilates" onclick="pickActivity(this)"><div class="activity-icon">🧘‍♀️</div><div class="activity-name">Pilates</div></div>
+      <div class="activity-btn" data-act="Cardio / Running" onclick="pickActivity(this)"><div class="activity-icon">🏃‍♀️</div><div class="activity-name">Cardio / Running</div></div>
+      <div class="activity-btn" data-act="Walking" onclick="pickActivity(this)"><div class="activity-icon">🚶‍♀️</div><div class="activity-name">Walking</div></div>
+      <div class="activity-btn" data-act="Other" onclick="pickActivity(this)"><div class="activity-icon">✨</div><div class="activity-name">Other</div></div>
+    </div>
+    <input class="other-input hidden" id="other-input" placeholder="What did you do?" />
+    <div class="section-title" style="margin-bottom:10px;">Duration</div>
+    <div class="duration-row" id="duration-row">
+      <button class="dur-btn" data-dur="20 min" onclick="pickDur(this)">20 min</button>
+      <button class="dur-btn" data-dur="30 min" onclick="pickDur(this)">30 min</button>
+      <button class="dur-btn" data-dur="45 min" onclick="pickDur(this)">45 min</button>
+      <button class="dur-btn" data-dur="1 hour" onclick="pickDur(this)">1 hour</button>
+      <button class="dur-btn" data-dur="1.5 hours" onclick="pickDur(this)">1.5 hrs</button>
+    </div>
+    <button class="log-confirm" onclick="saveExternalLog()">Log activity</button>
+  </div>
+</div>
+
+<!-- ═══════════════ WORKOUT ═══════════════ -->
+<div class="screen" id="workout">
+  <div class="workout-header">
+    <button class="back-btn" onclick="showScreen('home')">← Back</button>
+    <div class="workout-title" id="workout-title">Workout</div>
+    <div class="workout-meta-txt" id="workout-meta"></div>
+  </div>
+  <div class="day-tabs-scroll" id="day-tabs"></div>
+  <div class="exercises-scroll" id="exercises-scroll">
+    <div id="notice-area"></div>
+    <div id="exercises-list"></div>
+  </div>
+  <div class="complete-area">
+    <div class="progress-wrap"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <button class="complete-btn" id="complete-btn" disabled onclick="completeWorkout()">Mark as complete 🌸</button>
+  </div>
+</div>
+
+<!-- ═══════════════ DONE ═══════════════ -->
+<div class="screen" id="done">
+  <div class="done-emoji">🌸</div>
+  <div class="done-title">You showed up!</div>
+  <div class="done-sub" id="done-sub">5 minutes that carry you through the day.</div>
+  <div class="done-streak-card">
+    <div class="done-streak-num" id="done-streak-num">1</div>
+    <div class="done-streak-lbl">day streak 🔥</div>
+  </div>
+  <button class="home-btn" onclick="goHome()">Back home</button>
+</div>
+
+<!-- ═══════════════ HISTORY ═══════════════ -->
+<div class="screen with-nav" id="history">
+  <div class="history-header">
+    <div class="history-title">Activity history</div>
+    <div class="history-sub" id="history-sub">All your movement, in one place</div>
+  </div>
+  <div class="legend-row">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div>Morning workout</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Class / activity</div>
+    <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,var(--pink) 50%,var(--purple) 50%)"></div>Both</div>
+  </div>
+  <div style="overflow-y:auto;flex:1;" id="history-body"></div>
+</div>
+
+<!-- ═══════════════ INSTALL ═══════════════ -->
+<div class="screen with-nav" id="install">
+  <div class="install-header">
+    <div class="install-title">Add to iPhone 📱</div>
+  </div>
+  <div class="install-body">
+    <div class="install-step"><div class="step-num">1</div><div class="step-text">Host this file for free at <strong>netlify.com/drop</strong> — just drag the HTML file onto the page. You'll get a URL instantly.</div></div>
+    <div class="install-step"><div class="step-num">2</div><div class="step-text">Open that URL in <strong>Google Chrome</strong> on your iPhone.</div></div>
+    <div class="install-step"><div class="step-num">3</div><div class="step-text">Tap the <strong>three dots menu</strong> (⋮) in the top right corner of Chrome.</div></div>
+    <div class="install-step"><div class="step-num">4</div><div class="step-text">Scroll down and tap <strong>"Add to Home Screen"</strong>.</div></div>
+    <div class="install-step"><div class="step-num">5</div><div class="step-text">Tap <strong>Add</strong> — it will appear on your home screen like an app. Open it from there every morning.</div></div>
+    <div class="install-note">💡 Your workout data and streak are saved locally on your phone. They stay between sessions as long as you don't clear your browser data.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ NAV ═══════════════ -->
+<div class="bottom-nav" id="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="showTab('home')"><span class="nav-icon">🏠</span>Home</button>
+  <button class="nav-btn" id="nav-history" onclick="showTab('history')"><span class="nav-icon">📅</span>History</button>
+  <button class="nav-btn" id="nav-install" onclick="showTab('install')"><span class="nav-icon">📱</span>Install</button>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// SVG EXERCISE ILLUSTRATIONS
+// ══════════════════════════════════════
+const ILLUSTRATIONS = {
+  // Shoulder circles / neck rolls
+  'Shoulder circles + neck rolls': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="14" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="36" y1="21" x2="36" y2="42" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M22 30 Q16 26 18 20" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round" fill="none" stroke-dasharray="2 2"/>
+    <path d="M50 30 Q56 26 54 20" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round" fill="none" stroke-dasharray="2 2"/>
+    <line x1="36" y1="42" x2="24" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="42" x2="48" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M20 28 Q14 22 20 16" stroke="#F4A0B0" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path d="M52 28 Q58 22 52 16" stroke="#F4A0B0" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  </svg>`,
+
+  'Hip sways side to side': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="13" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M36 20 L36 40" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M24 28 L36 28 L48 28" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 40 Q28 46 30 54" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M36 40 Q44 46 42 54" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M28 38 Q22 42 28 46" stroke="#F4A0B0" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+    <path d="M44 38 Q50 42 44 46" stroke="#F4A0B0" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+  </svg>`,
+
+  'Dumbbell bicep curls': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="13" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="36" y1="20" x2="36" y2="42" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 28 L22 36" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 28 L50 20" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <rect x="14" y="33" width="10" height="5" rx="2" fill="#E8637A"/>
+    <rect x="12" y="32" width="4" height="7" rx="1.5" fill="#F4A0B0"/>
+    <rect x="22" y="32" width="4" height="7" rx="1.5" fill="#F4A0B0"/>
+    <line x1="36" y1="42" x2="28" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="42" x2="44" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M22 36 Q18 42 22 46" stroke="#F4A0B0" stroke-width="1.2" fill="none" stroke-dasharray="2 1.5"/>
+  </svg>`,
+
+  'Overhead shoulder press': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="14" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="36" y1="21" x2="36" y2="42" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 25 L20 20" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 25 L52 20" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <rect x="12" y="15" width="10" height="5" rx="2" fill="#E8637A"/>
+    <rect x="10" y="13" width="4" height="8" rx="1.5" fill="#F4A0B0"/>
+    <rect x="20" y="13" width="4" height="8" rx="1.5" fill="#F4A0B0"/>
+    <rect x="50" y="15" width="10" height="5" rx="2" fill="#E8637A"/>
+    <rect x="48" y="13" width="4" height="8" rx="1.5" fill="#F4A0B0"/>
+    <rect x="58" y="13" width="4" height="8" rx="1.5" fill="#F4A0B0"/>
+    <line x1="36" y1="42" x2="28" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="42" x2="44" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
+
+  'Dumbbell lateral raises': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="14" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="36" y1="21" x2="36" y2="44" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 30 L16 30" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 30 L56 30" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <rect x="8" y="26" width="10" height="5" rx="2" fill="#E8637A"/>
+    <rect x="6" y="24" width="4" height="8" rx="1.5" fill="#F4A0B0"/>
+    <rect x="16" y="24" width="4" height="8" rx="1.5" fill="#F4A0B0"/>
+    <rect x="54" y="26" width="10" height="5" rx="2" fill="#E8637A"/>
+    <rect x="52" y="24" width="4" height="8" rx="1.5" fill="#F4A0B0"/>
+    <rect x="62" y="24" width="4" height="8" rx="1.5" fill="#F4A0B0"/>
+    <line x1="36" y1="44" x2="28" y2="60" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="44" x2="44" y2="60" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
+
+  'Plank hold': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="14" cy="28" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M20 30 L56 38" stroke="#E8637A" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="14" y1="34" x2="14" y2="50" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="56" y1="38" x2="56" y2="52" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="10" y1="50" x2="18" y2="50" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="52" y1="52" x2="60" y2="52" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`,
+
+  'Dead bugs': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="28" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M36 35 L36 52" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 40 L24 34" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M24 34 L16 26" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M36 40 L48 46" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="52" x2="26" y2="60" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="52" x2="46" y2="64" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <text x="36" y="18" text-anchor="middle" font-size="9" fill="#E8637A" font-family="sans-serif">lying</text>
+  </svg>`,
+
+  'Goblet squat (dumbbell)': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="11" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M36 18 L36 34" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 28 L28 26 L28 20" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+    <path d="M36 28 L44 26 L44 20" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+    <rect x="30" y="18" width="12" height="6" rx="2" fill="#E8637A"/>
+    <path d="M36 34 L22 50 L22 60" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M36 34 L50 50 L50 60" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+  </svg>`,
+
+  'Reverse lunges': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="30" cy="10" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M30 17 L30 34" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M30 26 L20 30" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M30 26 L40 24" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M30 34 L30 50 L24 62" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M30 34 L46 46 L52 62" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+  </svg>`,
+
+  'Glute bridges': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="14" cy="36" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M20 38 L34 30 L50 32 L58 46" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <line x1="50" y1="32" x2="50" y2="52" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="58" y1="46" x2="58" y2="56" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="8" y1="52" x2="22" y2="52" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M36 22 Q36 18 40 20" stroke="#F4A0B0" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+  </svg>`,
+
+  'Calf raises (hold dumbbells)': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="11" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="36" y1="18" x2="36" y2="40" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 28 L22 32" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M36 28 L50 32" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <rect x="14" y="29" width="10" height="5" rx="2" fill="#E8637A"/>
+    <rect x="48" y="29" width="10" height="5" rx="2" fill="#E8637A"/>
+    <line x1="36" y1="40" x2="30" y2="56" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="40" x2="42" y2="56" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M28 56 Q30 52 32 56" stroke="#E8637A" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path d="M40 56 Q42 52 44 56" stroke="#E8637A" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  </svg>`,
+
+  'Sumo squat hold pulse': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="10" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M36 17 L36 34" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 26 L24 30" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M36 26 L48 30" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M36 34 L22 42 L16 58" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M36 34 L50 42 L56 58" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+  </svg>`,
+
+  'Romanian deadlift (dumbbells)': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="52" cy="12" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M52 19 L52 36 L36 44 L20 44" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <rect x="10" y="40" width="12" height="6" rx="2" fill="#E8637A"/>
+    <rect x="8" y="38" width="4" height="9" rx="1.5" fill="#F4A0B0"/>
+    <rect x="20" y="38" width="4" height="9" rx="1.5" fill="#F4A0B0"/>
+    <line x1="52" y1="36" x2="46" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="52" y1="36" x2="58" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
+
+  'Bent-over rows': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="54" cy="16" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M54 23 L54 38 L32 42" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M32 42 L18 42" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M32 28 L32 42" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <rect x="10" y="38" width="10" height="5" rx="2" fill="#E8637A"/>
+    <rect x="8" y="36" width="4" height="8" rx="1.5" fill="#F4A0B0"/>
+    <rect x="18" y="36" width="4" height="8" rx="1.5" fill="#F4A0B0"/>
+    <line x1="54" y1="38" x2="48" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="54" y1="38" x2="60" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M32 28 Q28 30 32 34" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-dasharray="2 1.5"/>
+  </svg>`,
+
+  'Standing front raise': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="12" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="36" y1="19" x2="36" y2="42" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 30 L22 22" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M22 22 L14 16" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <rect x="8" y="12" width="8" height="5" rx="2" fill="#E8637A"/>
+    <path d="M36 30 L50 34" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="42" x2="28" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="42" x2="44" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
+
+  'Slow mountain climbers': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="24" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M18 26 L54 34" stroke="#E8637A" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="14" y1="30" x2="14" y2="48" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M54 34 L54 50" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M54 50 L60 58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 36 L32 46" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="10" y1="48" x2="18" y2="48" stroke="#E8637A" stroke-width="1.5"/>
+  </svg>`,
+
+  "Child's pose + deep breathing": `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="60" cy="38" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M54 40 L40 38 L16 36" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <line x1="40" y1="38" x2="38" y2="50" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="38" y1="50" x2="30" y2="56" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="38" y1="50" x2="46" y2="56" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="12" y1="36" x2="20" y2="36" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M16 28 Q12 24 16 20 Q20 16 24 20" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+  </svg>`,
+
+  // Low energy / gentle
+  'Slow neck rolls + shoulder shrugs': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="14" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="36" y1="21" x2="36" y2="44" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 28 L22 24" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M36 28 L50 24" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M30 8 Q36 4 42 8" stroke="#F4A0B0" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+    <line x1="36" y1="44" x2="28" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="44" x2="44" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
+
+  'Seated arm circles (floor)': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="18" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M36 25 L36 44" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 32 L52 28" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M52 28 Q60 22 56 16 Q52 10 46 14" stroke="#F4A0B0" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+    <path d="M36 44 L20 52" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 44 L52 52" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="16" y1="52" x2="56" y2="52" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`,
+
+  'Light dumbbell curls (very slow)': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="13" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="36" y1="20" x2="36" y2="42" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 28 L22 36" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <rect x="14" y="33" width="9" height="4" rx="2" fill="#E8637A" opacity="0.6"/>
+    <path d="M36 28 L50 34" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="42" x2="28" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="42" x2="44" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
+
+  'Seated shoulder press (light)': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="14" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="36" y1="21" x2="36" y2="42" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 26 L20 20" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M36 26 L52 20" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <rect x="12" y="16" width="9" height="4" rx="2" fill="#E8637A" opacity="0.6"/>
+    <rect x="51" y="16" width="9" height="4" rx="2" fill="#E8637A" opacity="0.6"/>
+    <path d="M36 42 L22 52" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 42 L50 52" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="18" y1="52" x2="54" y2="52" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`,
+
+  'Chest opener stretch': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="14" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="36" y1="21" x2="36" y2="44" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 30 L16 30" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 30 L56 30" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M16 30 Q12 22 18 18" stroke="#F4A0B0" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+    <path d="M56 30 Q60 22 54 18" stroke="#F4A0B0" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+    <line x1="36" y1="44" x2="28" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="44" x2="44" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
+
+  'Lying leg circles on mat': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="14" cy="38" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="20" y1="40" x2="50" y2="44" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="24" y1="36" x2="24" y2="52" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M50 44 L50 34" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="54" cy="26" r="6" stroke="#F4A0B0" stroke-width="1.5" fill="none" stroke-dasharray="3 2"/>
+    <path d="M50 30 L54 32" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`,
+
+  'Slow glute bridges': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="14" cy="38" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M20 40 L34 32 L50 34 L58 46" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <line x1="50" y1="34" x2="50" y2="54" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="58" y1="46" x2="58" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="8" y1="54" x2="22" y2="54" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M38 22 Q36 16 42 18" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+  </svg>`,
+
+  'Seated hip flexor stretch': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="20" cy="20" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M20 27 L20 44" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M20 34 L34 30" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M20 44 L10 56" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M20 44 L36 48 L48 44" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <line x1="6" y1="56" x2="54" y2="56" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M46 38 Q54 36 54 44 Q54 52 46 52" stroke="#F4A0B0" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+  </svg>`,
+
+  'Bodyweight squats (very slow)': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="10" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M36 17 L36 34" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 26 L22 30" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M36 26 L50 30" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M36 34 L22 48 L18 60" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M36 34 L50 48 L54 60" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+  </svg>`,
+
+  'Standing forward fold': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="36" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M36 29 L36 14" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 43 L36 56" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M30 14 L46 14" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 29 L18 36" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 29 L54 36" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M30 56 L42 56" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`,
+
+  "Child's pose": `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="60" cy="38" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M54 40 L38 38 L14 34" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <line x1="38" y1="38" x2="36" y2="52" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="52" x2="28" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="52" x2="44" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="10" y1="34" x2="20" y2="34" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`,
+
+  'Cat-cow breathing': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="30" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M18 32 L54 36" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M30 28 Q36 18 42 28" stroke="#F4A0B0" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-dasharray="3 2"/>
+    <line x1="16" y1="36" x2="16" y2="52" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="54" y1="36" x2="54" y2="52" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="12" y1="52" x2="20" y2="52" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="50" y1="52" x2="58" y2="52" stroke="#E8637A" stroke-width="1.5"/>
+    <circle cx="60" cy="20" r="5" fill="none" stroke="#F4A0B0" stroke-width="1.3" stroke-dasharray="2 2"/>
+  </svg>`,
+
+  'Seated spinal twist': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="14" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="36" y1="21" x2="36" y2="42" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 30 L52 26" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M36 30 L20 34" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M36 42 L18 50" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 42 L52 50" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="14" y1="50" x2="56" y2="50" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M48 22 Q56 18 56 26" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+  </svg>`,
+
+  'Lying single leg stretch': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="14" cy="32" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M20 34 L48 36" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="22" y1="30" x2="26" y2="44" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M48 36 L56 28" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M48 36 L52 50" stroke="#E8637A" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 2"/>
+    <circle cx="56" cy="28" r="3" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.2"/>
+    <path d="M20 34 L14 26" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`,
+
+  'Savasana with deep breathing': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="36" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="18" y1="36" x2="58" y2="36" stroke="#E8637A" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="30" y1="36" x2="26" y2="50" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="44" y1="36" x2="48" y2="50" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="22" y1="36" x2="18" y2="28" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="52" y1="36" x2="56" y2="28" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M36 22 Q32 16 36 12 Q40 16 36 22" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+  </svg>`,
+
+  // Period / pre-period
+  "Wide-leg child's pose": `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="60" cy="36" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M54 38 L36 36 L12 32" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <line x1="36" y1="36" x2="32" y2="52" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="32" y1="52" x2="22" y2="60" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="32" y1="52" x2="42" y2="60" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="8" y1="32" x2="18" y2="32" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M20 22 Q14 18 16 12" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+  </svg>`,
+
+  'Butterfly stretch (seated)': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="16" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="36" y1="23" x2="36" y2="40" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 32 L18 36 L12 48" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M36 32 L54 36 L60 48" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <line x1="36" y1="40" x2="12" y2="52" stroke="#E8637A" stroke-width="1.5" stroke-dasharray="3 2"/>
+    <line x1="36" y1="40" x2="60" y2="52" stroke="#E8637A" stroke-width="1.5" stroke-dasharray="3 2"/>
+    <ellipse cx="24" cy="52" rx="8" ry="5" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-dasharray="2 2"/>
+    <ellipse cx="48" cy="52" rx="8" ry="5" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-dasharray="2 2"/>
+  </svg>`,
+
+  'Low lunge hip flexor stretch': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="24" cy="14" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M24 21 L24 38" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M24 30 L14 28" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M24 30 L36 26" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M24 38 L14 52 L14 62" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M24 38 L44 44 L58 36" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <circle cx="58" cy="36" r="3" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.2"/>
+    <line x1="10" y1="62" x2="18" y2="62" stroke="#E8637A" stroke-width="1.5"/>
+  </svg>`,
+
+  'Supine knee-to-chest hug': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="14" cy="36" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="20" y1="36" x2="44" y2="36" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="28" y1="30" x2="28" y2="50" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M44 36 L44 24 L54 24 L54 36" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M36 36 Q40 28 44 24" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+    <circle cx="54" cy="20" r="5" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.2"/>
+  </svg>`,
+
+  'Pelvic tilts (lying)': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="14" cy="34" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="20" y1="36" x2="42" y2="38" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="28" y1="32" x2="28" y2="48" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M42 38 L42 26 L54 24" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M42 38 L50 48" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M38 30 Q44 26 48 32" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+  </svg>`,
+
+  'Box breathing (4-4-4-4)': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="36" r="18" stroke="#F4A0B0" stroke-width="1.5" fill="none" stroke-dasharray="4 3"/>
+    <circle cx="36" cy="36" r="10" fill="#FCE8EC" stroke="#E8637A" stroke-width="1.5"/>
+    <text x="36" y="40" text-anchor="middle" font-size="10" fill="#E8637A" font-family="sans-serif" font-weight="500">4</text>
+    <path d="M36 18 L36 12" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M36 60 L36 54" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M18 36 L12 36" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M60 36 L54 36" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`,
+
+  'Legs up the wall pose': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="14" cy="44" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="20" y1="44" x2="44" y2="44" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="28" y1="38" x2="28" y2="54" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M44 44 L44 14" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M44 14 L56 14" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="56" y1="10" x2="56" y2="58" stroke="#E8637A" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M38 24 Q44 20 48 24" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+  </svg>`,
+
+  'Gentle neck and shoulder rolls': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="14" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="36" y1="21" x2="36" y2="44" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 28 L22 26" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M36 28 L50 26" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M28 8 Q36 4 44 8 Q50 14 44 20 Q36 24 28 20 Q22 14 28 8" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-dasharray="3 2"/>
+    <line x1="36" y1="44" x2="28" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="44" x2="44" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
+
+  'Supported child\'s pose': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="60" cy="36" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M54 38 L36 36 L12 34" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <line x1="36" y1="36" x2="32" y2="52" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="32" y1="52" x2="22" y2="60" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="32" y1="52" x2="44" y2="60" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <rect x="10" y="26" width="12" height="8" rx="3" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.2"/>
+    <line x1="8" y1="34" x2="24" y2="34" stroke="#E8637A" stroke-width="1.5"/>
+  </svg>`,
+
+  'Gentle pelvic tilts (lying)': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="14" cy="36" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="20" y1="36" x2="44" y2="36" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="28" y1="30" x2="28" y2="50" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M44 36 L44 24 L54 22" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M44 36 L50 46" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 28 Q44 22 50 28" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+  </svg>`,
+
+  'Supine butterfly (soles together)': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="14" cy="38" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="20" y1="38" x2="42" y2="36" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="28" y1="32" x2="28" y2="50" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M42 36 L34 26 L26 28" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+    <path d="M42 36 L52 26 L62 30" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+    <ellipse cx="30" cy="26" rx="6" ry="4" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-dasharray="2 2"/>
+    <ellipse cx="54" cy="26" rx="6" ry="4" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-dasharray="2 2"/>
+  </svg>`,
+
+  'Legs up the wall': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="14" cy="46" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="20" y1="46" x2="46" y2="44" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="28" y1="40" x2="28" y2="56" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M46 44 L44 14" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M44 14 L56 14" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="56" y1="8" x2="56" y2="62" stroke="#E8637A" stroke-width="2.5" stroke-linecap="round"/>
+  </svg>`,
+
+  'Seated forward fold': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="20" cy="28" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M20 35 L20 50" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M20 42 L10 44" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M20 42 L36 38 L56 36" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+    <line x1="14" y1="50" x2="58" y2="50" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M44 28 Q56 24 56 36" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+  </svg>`,
+
+  'Cat-cow on mat': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="30" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M18 32 L54 34" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M30 26 Q36 16 42 26" stroke="#F4A0B0" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-dasharray="3 2"/>
+    <line x1="16" y1="36" x2="16" y2="52" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="54" y1="34" x2="54" y2="52" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="12" y1="52" x2="20" y2="52" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="50" y1="52" x2="58" y2="52" stroke="#E8637A" stroke-width="1.5"/>
+  </svg>`,
+
+  'Seated hip circles': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="14" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="36" y1="21" x2="36" y2="40" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 40 L20 50" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 40 L52 50" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="16" y1="50" x2="56" y2="50" stroke="#E8637A" stroke-width="1.5" stroke-linecap="round"/>
+    <ellipse cx="36" cy="34" rx="10" ry="6" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-dasharray="3 2"/>
+    <path d="M42 30 L46 28" stroke="#F4A0B0" stroke-width="1.2" stroke-linecap="round"/>
+  </svg>`,
+
+  'Low lunge with hip opener': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="22" cy="12" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M22 19 L22 36" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M22 28 L12 24" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M22 28 L36 22" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M22 36 L12 52 L12 62" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M22 36 L44 44 L58 38" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M46 36 Q56 30 58 38" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+  </svg>`,
+
+  'Lying spinal twist': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="14" cy="32" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="20" y1="32" x2="48" y2="34" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="22" y1="26" x2="16" y2="22" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="22" y1="26" x2="28" y2="20" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M48 34 L44 48" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M48 34 L58 44" stroke="#E8637A" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 2"/>
+    <path d="M54 26 Q62 28 60 38" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-dasharray="2 2"/>
+  </svg>`,
+
+  'Hip circles + shoulder rolls': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="13" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="36" y1="20" x2="36" y2="42" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 28 L22 26" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M36 28 L50 26" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <ellipse cx="36" cy="36" rx="9" ry="6" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-dasharray="3 2"/>
+    <line x1="36" y1="42" x2="28" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="42" x2="44" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
+
+  'Bodyweight squats (slow)': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="10" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M36 17 L36 34" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 26 L22 30" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M36 26 L50 30" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M36 34 L22 48 L18 60" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M36 34 L50 48 L54 60" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+  </svg>`,
+
+  'Standing side stretch': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="12" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M36 19 Q40 32 44 42" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M36 26 L18 22" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M36 26 L52 18" stroke="#E8637A" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M52 18 L60 10" stroke="#F4A0B0" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2 2"/>
+    <line x1="44" y1="42" x2="38" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="44" y1="42" x2="52" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
+
+  'Arm circles + wrist rolls': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="14" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="36" y1="21" x2="36" y2="44" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 30 L20 28" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 30 L52 28" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="20" cy="28" r="6" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-dasharray="3 2"/>
+    <circle cx="52" cy="28" r="6" stroke="#F4A0B0" stroke-width="1.3" fill="none" stroke-dasharray="3 2"/>
+    <line x1="36" y1="44" x2="28" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="44" x2="44" y2="58" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
+
+  'Light glute bridges': `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="14" cy="38" r="6" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <path d="M20 40 L34 32 L50 34 L58 46" stroke="#E8637A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <line x1="50" y1="34" x2="50" y2="54" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="58" y1="46" x2="58" y2="56" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="8" y1="54" x2="22" y2="54" stroke="#E8637A" stroke-width="1.5"/>
+  </svg>`,
+};
+
+function getIllustration(name) {
+  if (ILLUSTRATIONS[name]) return ILLUSTRATIONS[name];
+  // fallback
+  return `<svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="14" r="7" fill="#F4A0B0" stroke="#E8637A" stroke-width="1.5"/>
+    <line x1="36" y1="21" x2="36" y2="44" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="30" x2="22" y2="38" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="30" x2="50" y2="38" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="44" x2="28" y2="60" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="44" x2="44" y2="60" stroke="#E8637A" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+}
+
+// ══════════════════════════════════════
+// WORKOUT DATA
+// ══════════════════════════════════════
+const WORKOUT_DATA = {
+  normal:{title:'Full workout',meta:'5 min · Full body toning',notice:null,days:['Day A','Day B','Day C'],
+    content:[
+      {label:'Warm-up',exercises:[{name:'Shoulder circles + neck rolls',detail:'30 sec'},{name:'Hip sways side to side',detail:'30 sec'}],tip:'Breathe deeply — signal to your body it\'s time to move.'},
+      {label:'Upper body + core',exercises:[{name:'Dumbbell bicep curls',detail:'12 reps × 2'},{name:'Overhead shoulder press',detail:'10 reps × 2'},{name:'Dumbbell lateral raises',detail:'10 reps × 2'},{name:'Plank hold',detail:'25 sec × 2'},{name:'Dead bugs',detail:'8 reps'}],tip:'Brace your core during the press — it doubles as a stability exercise for your abs.'},
+      {label:'Warm-up',exercises:[{name:'Hip sways side to side',detail:'30 sec'},{name:'Bodyweight squats (slow)',detail:'5 reps'}],tip:'Keep heels down — it anchors your whole lower body.'},
+      {label:'Lower body + glutes',exercises:[{name:'Goblet squat (dumbbell)',detail:'12 reps × 2'},{name:'Reverse lunges',detail:'10 reps each leg'},{name:'Glute bridges',detail:'15 reps × 2'},{name:'Calf raises (hold dumbbells)',detail:'15 reps × 2'},{name:'Sumo squat hold pulse',detail:'20 sec'}],tip:'Squeeze at the top of each bridge for 2 sec — activates glutes far more effectively.'},
+      {label:'Warm-up',exercises:[{name:'Cat-cow on mat',detail:'45 sec'},{name:'Arm circles + wrist rolls',detail:'30 sec'}],tip:null},
+      {label:'Full body flow',exercises:[{name:'Romanian deadlift (dumbbells)',detail:'12 reps × 2'},{name:'Bent-over rows',detail:'10 reps × 2'},{name:'Standing front raise',detail:'10 reps × 2'},{name:'Slow mountain climbers',detail:'16 reps'},{name:"Child's pose + deep breathing",detail:'1 min'}],tip:'4 counts in, 6 out at the end — sets a calm tone for the day.'}
+    ],daySections:[[0,1],[2,3],[4,5]]},
+
+  lowenergy:{title:'Gentle reset',meta:'5 min · Low energy mode',notice:'No jumping, no strain. Even 5 minutes will give you more energy than staying in bed.',days:['Option A','Option B','Option C'],
+    content:[
+      {label:'Gentle upper body',exercises:[{name:'Slow neck rolls + shoulder shrugs',detail:'1 min'},{name:'Seated arm circles (floor)',detail:'30 sec each direction'},{name:'Light dumbbell curls (very slow)',detail:'8 reps × 2'},{name:'Seated shoulder press (light)',detail:'8 reps × 2'},{name:'Chest opener stretch',detail:'1 min'}],tip:'Move at half your normal pace. Slow is still movement.'},
+      {label:'Gentle lower body',exercises:[{name:'Lying leg circles on mat',detail:'30 sec each leg'},{name:'Slow glute bridges',detail:'10 reps × 2'},{name:'Seated hip flexor stretch',detail:'45 sec each side'},{name:'Bodyweight squats (very slow)',detail:'8 reps'},{name:'Standing forward fold',detail:'1 min'}],tip:'Focus on the exhale — it relaxes the body while still activating muscles.'},
+      {label:'Full body stretch',exercises:[{name:"Child's pose",detail:'1 min'},{name:'Cat-cow breathing',detail:'1 min'},{name:'Seated spinal twist',detail:'30 sec each side'},{name:'Lying single leg stretch',detail:'8 reps each leg'},{name:'Savasana with deep breathing',detail:'1 min'}],tip:'This is closer to yoga than a workout — and that\'s okay. You\'re still showing up.'}
+    ],daySections:[[0],[1],[2]]},
+
+  pre:{title:'Pre-period',meta:'5 min · Ease cramps before they start',notice:'3–5 days before your period. Light movement now can reduce cramp intensity later.',days:['Option 1','Option 2','Option 3'],
+    content:[
+      {label:'Hip + lower back release',exercises:[{name:"Wide-leg child's pose",detail:'1 min'},{name:'Butterfly stretch (seated)',detail:'1 min'},{name:'Low lunge hip flexor stretch',detail:'45 sec each side'},{name:'Supine knee-to-chest hug',detail:'30 sec each side'},{name:'Pelvic tilts (lying)',detail:'10 reps slow'}],tip:'Breathe into your lower belly — it helps release the psoas, often the root of pre-period cramping.'},
+      {label:'Light toning',exercises:[{name:'Bodyweight squats (slow)',detail:'10 reps × 2'},{name:'Glute bridges',detail:'12 reps × 2'},{name:'Dumbbell lateral raises',detail:'10 reps × 2'},{name:'Standing side stretch',detail:'30 sec each side'},{name:'Seated forward fold',detail:'1 min'}],tip:'Energy is usually higher before the period — good time to do some toning.'},
+      {label:'Calming breathwork',exercises:[{name:'Box breathing (4-4-4-4)',detail:'2 min'},{name:'Seated spinal twist',detail:'45 sec each side'},{name:'Legs up the wall pose',detail:'2 min'},{name:'Gentle neck and shoulder rolls',detail:'30 sec'}],tip:'Box breathing lowers cortisol — doing this before your period can reduce how intense cramps feel.'}
+    ],daySections:[[0],[1],[2]]},
+
+  during:{title:'Period care',meta:'5 min · Pain-aware & restorative',notice:'Gentle movement increases blood flow and releases endorphins. Skip anything that feels wrong. Rest is also valid.',days:['Day 1–2 heavy','Day 2–3','Day 3–5 lighter'],
+    content:[
+      {label:'Pain relief flow',exercises:[{name:"Supported child's pose",detail:'2 min'},{name:'Gentle pelvic tilts (lying)',detail:'10 reps slow'},{name:'Supine butterfly (soles together)',detail:'1 min'},{name:'Legs up the wall',detail:'2 min'}],tip:'This is pain management through movement. If cramps are severe, do this in bed with a heat pad nearby.'},
+      {label:'Gentle mobility',exercises:[{name:'Cat-cow breathing',detail:'1 min'},{name:'Seated hip circles',detail:'30 sec each direction'},{name:'Low lunge with hip opener',detail:'45 sec each side'},{name:'Slow glute bridges',detail:'10 reps'},{name:'Lying spinal twist',detail:'30 sec each side'}],tip:'Gentle movement on day 2–3 boosts endorphins which naturally reduce pain perception.'},
+      {label:'Easing back in',exercises:[{name:'Hip circles + shoulder rolls',detail:'1 min'},{name:'Bodyweight squats (slow)',detail:'10 reps × 2'},{name:'Light glute bridges',detail:'12 reps × 2'},{name:'Standing side stretch',detail:'30 sec each side'},{name:'Seated forward fold',detail:'1 min'}],tip:'By day 3–5 energy starts returning. This bridges you back to your regular routine without overdoing it.'}
+    ],daySections:[[0],[1],[2]]}
+};
+
+// ══════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════
+function getStore(){try{return JSON.parse(localStorage.getItem('mm2')||'{}')}catch{return{}}}
+function saveStore(d){try{localStorage.setItem('mm2',JSON.stringify(d))}catch{}}
+function todayKey(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+
+function getStreak(){
+  const logs=(getStore().logs||{});
+  let streak=0,d=new Date();
+  while(true){
+    const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    if(logs[k]){streak++;d.setDate(d.getDate()-1);}else break;
+  }
+  return streak;
+}
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+let selectedMode='normal';
+let currentDay=0;
+let checkedEx=new Set();
+let pickedActivity=null;
+let pickedDuration=null;
+let pickedDays=new Set();
+
+// ══════════════════════════════════════
+// SCREENS
+// ══════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active','fade-in');
+  setTimeout(()=>document.getElementById(id).classList.remove('fade-in'),400);
+  const nav=document.getElementById('bottom-nav');
+  nav.style.display=id==='done'?'none':'flex';
+  if(id!=='done'){
+    ['home','history','install'].forEach(t=>{
+      const b=document.getElementById('nav-'+t);
+      if(b)b.classList.toggle('active',t===id);
+    });
+  }
+}
+
+function showTab(tab){
+  showScreen(tab);
+  if(tab==='home')updateHome();
+  if(tab==='history')renderHistory();
+}
+
+// ══════════════════════════════════════
+// HOME
+// ══════════════════════════════════════
+function updateHome(){
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const now=new Date();
+  const hr=now.getHours();
+  document.getElementById('greeting').textContent=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
+  document.getElementById('today-label').textContent=`${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
+  const streak=getStreak();
+  document.getElementById('streak-label').textContent=streak===1?'1 day streak':`${streak} day streak`;
+  const store=getStore();
+  const logs=store.logs||{};
+  const external=store.external||[];
+  const allMorning=Object.keys(logs).length;
+  document.getElementById('total-workouts').textContent=allMorning;
+  const m=String(now.getMonth()+1).padStart(2,'0');
+  document.getElementById('this-month').textContent=Object.keys(logs).filter(k=>k.startsWith(`${now.getFullYear()}-${m}`)).length;
+  document.getElementById('total-classes').textContent=external.length;
+  renderWeekDots();
+}
+
+function renderWeekDots(){
+  const store=getStore();
+  const logs=store.logs||{};
+  const external=store.external||[];
+  const workoutDays=new Set(store.workoutDays||[1,3,5]);
+  const now=new Date();
+  const weekStart=new Date(now);weekStart.setDate(now.getDate()-now.getDay());
+  const dayNames=['S','M','T','W','T','F','S'];
+  const container=document.getElementById('week-dots');
+  container.innerHTML='';
+  for(let i=0;i<7;i++){
+    const d=new Date(weekStart);d.setDate(weekStart.getDate()+i);
+    const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const isToday=k===todayKey();
+    const hasMorning=!!logs[k];
+    const hasExternal=external.some(e=>e.date===k);
+    let cls='wday-circle';
+    if(hasMorning&&hasExternal)cls+=' done-both';
+    else if(hasMorning)cls+=' done-morning';
+    else if(hasExternal)cls+=' done-external';
+    else if(workoutDays.has(i))cls+=' is-workout';
+    else if(isToday)cls+=' is-today';
+    const div=document.createElement('div');div.className='week-day';
+    div.innerHTML=`<div class="wday-name">${dayNames[i]}</div><div class="${cls}">${(hasMorning||hasExternal)?'✓':d.getDate()}</div>`;
+    container.appendChild(div);
+  }
+}
+
+function selectMode(el){
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMode=el.dataset.mode;
+}
+
+// ══════════════════════════════════════
+// SET WORKOUT DAYS
+// ══════════════════════════════════════
+function openSetDays(){
+  const store=getStore();
+  pickedDays=new Set(store.workoutDays||[1,3,5]);
+  const dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const container=document.getElementById('days-picker');
+  container.innerHTML='';
+  dayNames.forEach((n,i)=>{
+    const btn=document.createElement('button');
+    btn.className='day-pick-btn'+(pickedDays.has(i)?' picked':'');
+    btn.textContent=n;
+    btn.onclick=()=>{
+      if(pickedDays.has(i))pickedDays.delete(i);
+      else pickedDays.add(i);
+      btn.classList.toggle('picked',pickedDays.has(i));
+    };
+    container.appendChild(btn);
+  });
+  document.getElementById('setDaysModal').classList.remove('hidden');
+}
+
+function closeSetDays(e){if(e.target===document.getElementById('setDaysModal'))document.getElementById('setDaysModal').classList.add('hidden');}
+
+function saveWorkoutDays(){
+  const store=getStore();
+  store.workoutDays=Array.from(pickedDays);
+  saveStore(store);
+  document.getElementById('setDaysModal').classList.add('hidden');
+  renderWeekDots();
+}
+
+// ══════════════════════════════════════
+// LOG EXTERNAL
+// ══════════════════════════════════════
+function openLogExternal(){
+  pickedActivity=null;pickedDuration=null;
+  document.querySelectorAll('.activity-btn').forEach(b=>b.classList.remove('picked'));
+  document.querySelectorAll('.dur-btn').forEach(b=>b.classList.remove('picked'));
+  document.getElementById('other-input').value='';
+  document.getElementById('other-input').classList.add('hidden');
+  document.getElementById('logModal').classList.remove('hidden');
+}
+
+function closeLogModal(e){if(e.target===document.getElementById('logModal'))document.getElementById('logModal').classList.add('hidden');}
+
+function pickActivity(el){
+  document.querySelectorAll('.activity-btn').forEach(b=>b.classList.remove('picked'));
+  el.classList.add('picked');
+  pickedActivity=el.dataset.act;
+  document.getElementById('other-input').classList.toggle('hidden',pickedActivity!=='Other');
+}
+
+function pickDur(el){
+  document.querySelectorAll('.dur-btn').forEach(b=>b.classList.remove('picked'));
+  el.classList.add('picked');
+  pickedDuration=el.dataset.dur;
+}
+
+function saveExternalLog(){
+  if(!pickedActivity){alert('Please pick an activity');return;}
+  const actName=pickedActivity==='Other'?(document.getElementById('other-input').value||'Other activity'):pickedActivity;
+  const store=getStore();
+  if(!store.external)store.external=[];
+  store.external.push({date:todayKey(),activity:actName,duration:pickedDuration||'',ts:Date.now()});
+  saveStore(store);
+  document.getElementById('logModal').classList.add('hidden');
+  updateHome();
+}
+
+// ══════════════════════════════════════
+// WORKOUT
+// ══════════════════════════════════════
+function startWorkout(){
+  const data=WORKOUT_DATA[selectedMode];
+  currentDay=0;checkedEx.clear();
+  document.getElementById('workout-title').textContent=data.title;
+  document.getElementById('workout-meta').textContent=data.meta;
+  renderDayTabs();renderExercises();
+  showScreen('workout');
+}
+
+function renderDayTabs(){
+  const data=WORKOUT_DATA[selectedMode];
+  const c=document.getElementById('day-tabs');c.innerHTML='';
+  data.days.forEach((label,i)=>{
+    const btn=document.createElement('button');
+    btn.className='day-pill'+(i===currentDay?' active':'');
+    btn.textContent=label;
+    btn.onclick=()=>{currentDay=i;checkedEx.clear();renderDayTabs();renderExercises();};
+    c.appendChild(btn);
+  });
+}
+
+function renderExercises(){
+  const data=WORKOUT_DATA[selectedMode];
+  document.getElementById('notice-area').innerHTML=data.notice?`<div class="notice-card"><strong>Note:</strong> ${data.notice}</div>`:'';
+  const sects=data.daySections[currentDay].map(i=>data.content[i]);
+  const list=document.getElementById('exercises-list');list.innerHTML='';
+  let offset=0;
+  sects.forEach(sec=>{
+    const ph=document.createElement('div');ph.className='phase-header';ph.textContent=sec.label;list.appendChild(ph);
+    sec.exercises.forEach((ex,i)=>{
+      const idx=offset+i;
+      const card=document.createElement('div');
+      card.className='ex-card'+(checkedEx.has(idx)?' done-ex':'');
+      card.id=`ex-${idx}`;
+      card.innerHTML=`
+        <div class="ex-card-top">
+          <div class="ex-illustration">${getIllustration(ex.name)}</div>
+          <div class="ex-info-block">
+            <div class="ex-title">${ex.name}</div>
+            <div class="ex-detail">${ex.detail}</div>
+            <div class="ex-check-row">
+              <div class="ex-check${checkedEx.has(idx)?' checked':''}" onclick="toggleEx(${idx})"></div>
+              <span class="ex-check-label">${checkedEx.has(idx)?'Done!':'Tap when done'}</span>
+            </div>
+          </div>
+        </div>`;
+      list.appendChild(card);
+    });
+    if(sec.tip){const t=document.createElement('div');t.className='tip-card';t.innerHTML=`<span>💡</span><span>${sec.tip}</span>`;list.appendChild(t);}
+    offset+=sec.exercises.length;
+  });
+  updateProgress();
+}
+
+function getTotalEx(){
+  const data=WORKOUT_DATA[selectedMode];
+  return data.daySections[currentDay].reduce((s,i)=>s+data.content[i].exercises.length,0);
+}
+
+function toggleEx(idx){
+  if(checkedEx.has(idx))checkedEx.delete(idx);else checkedEx.add(idx);
+  const card=document.getElementById(`ex-${idx}`);
+  if(card){
+    card.classList.toggle('done-ex',checkedEx.has(idx));
+    const chk=card.querySelector('.ex-check');
+    const lbl=card.querySelector('.ex-check-label');
+    chk.classList.toggle('checked',checkedEx.has(idx));
+    lbl.textContent=checkedEx.has(idx)?'Done!':'Tap when done';
+  }
+  updateProgress();
+}
+
+function updateProgress(){
+  const total=getTotalEx(),done=checkedEx.size;
+  document.getElementById('progress-fill').style.width=(total>0?Math.round((done/total)*100):0)+'%';
+  const btn=document.getElementById('complete-btn');
+  btn.disabled=done<total;
+  btn.textContent=done<total?`${done} of ${total} done`:'Mark as complete 🌸';
+}
+
+function completeWorkout(){
+  const store=getStore();
+  if(!store.logs)store.logs={};
+  store.logs[todayKey()]={mode:selectedMode,day:currentDay,ts:Date.now()};
+  saveStore(store);
+  const streak=getStreak();
+  document.getElementById('done-streak-num').textContent=streak;
+  const msgs=['Your body moved. Your day is set.','5 minutes that carry you through the day.','You showed up for yourself. That\'s everything.','Done before most people are even awake.','Every morning counts. This one did.'];
+  document.getElementById('done-sub').textContent=msgs[Math.floor(Math.random()*msgs.length)];
+  showScreen('done');
+}
+
+function goHome(){showScreen('home');updateHome();}
+
+// ══════════════════════════════════════
+// HISTORY
+// ══════════════════════════════════════
+function renderHistory(){
+  const store=getStore();
+  const logs=store.logs||{};
+  const external=store.external||[];
+  const now=new Date();
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const body=document.getElementById('history-body');
+  body.innerHTML='';
+
+  // Calendar for current + last month
+  for(let m=0;m<=1;m++){
+    const d=new Date(now.getFullYear(),now.getMonth()-m,1);
+    const yr=d.getFullYear(),mo=d.getMonth();
+    const daysInMonth=new Date(yr,mo+1,0).getDate();
+    const firstDay=new Date(yr,mo,1).getDay();
+    const sec=document.createElement('div');sec.className='month-section';
+    sec.innerHTML=`<div class="month-label">${months[mo]} ${yr}</div>`;
+    const grid=document.createElement('div');grid.className='cal-grid';
+    ['S','M','T','W','T','F','S'].forEach(n=>{const el=document.createElement('div');el.className='cal-header';el.textContent=n;grid.appendChild(el);});
+    for(let i=0;i<firstDay;i++){const el=document.createElement('div');el.className='cal-cell';grid.appendChild(el);}
+    for(let day=1;day<=daysInMonth;day++){
+      const k=`${yr}-${String(mo+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const isToday=k===todayKey();
+      const hasMorning=!!logs[k];
+      const hasExt=external.some(e=>e.date===k);
+      const el=document.createElement('div');
+      let cls='cal-cell';
+      if(hasMorning&&hasExt)cls+=' both';
+      else if(hasMorning)cls+=' morning';
+      else if(hasExt)cls+=' external';
+      else if(isToday)cls+=' today-c';
+      el.className=cls;el.textContent=day;
+      grid.appendChild(el);
+    }
+    sec.appendChild(grid);
+    body.appendChild(sec);
+  }
+
+  // Recent activity list
+  const allEntries=[];
+  Object.entries(logs).forEach(([date,v])=>allEntries.push({date,type:'morning',label:'Morning workout',sub:v.mode,ts:v.ts||0}));
+  external.forEach((e,i)=>allEntries.push({date:e.date,type:'external',label:e.activity,sub:e.duration,ts:e.ts||0,idx:i}));
+  allEntries.sort((a,b)=>b.ts-a.ts);
+
+  if(allEntries.length){
+    const listSec=document.createElement('div');listSec.className='activity-log-list';
+    const title=document.createElement('div');title.className='phase-header';title.style.padding='0 0 8px';title.textContent='Recent activity';
+    listSec.appendChild(title);
+    allEntries.slice(0,20).forEach(entry=>{
+      const el=document.createElement('div');el.className='activity-entry';
+      const modeLabels={normal:'Regular day',lowenergy:'Low energy',pre:'Pre-period',during:'During period'};
+      const sub=entry.type==='morning'?(modeLabels[entry.sub]||entry.sub):(entry.sub||'');
+      const dateStr=formatDate(entry.date);
+      el.innerHTML=`
+        <div class="entry-icon-wrap ${entry.type==='morning'?'morning-ic':'external-ic'}">${entry.type==='morning'?'🌸':'✨'}</div>
+        <div class="entry-info"><div class="entry-title">${entry.label}</div><div class="entry-meta">${sub}</div></div>
+        <div class="entry-date">${dateStr}</div>
+        ${entry.type==='external'?`<button class="delete-btn" onclick="deleteExternal(${entry.idx})">×</button>`:''}`;
+      listSec.appendChild(el);
+    });
+    body.appendChild(listSec);
+  }
+
+  const total=Object.keys(logs).length+external.length;
+  document.getElementById('history-sub').textContent=`${total} activities logged`;
+}
+
+function formatDate(k){
+  const now=new Date(),td=todayKey();
+  const yd=new Date();yd.setDate(yd.getDate()-1);
+  const yk=`${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`;
+  if(k===td)return'Today';
+  if(k===yk)return'Yesterday';
+  const d=new Date(k+'T00:00:00');
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+
+function deleteExternal(idx){
+  const store=getStore();
+  store.external=store.external||[];
+  store.external.splice(idx,1);
+  saveStore(store);
+  renderHistory();updateHome();
+}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+updateHome();
+</script>
+</body>
+</html>
